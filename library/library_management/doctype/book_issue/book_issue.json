@@ -9,7 +9,13 @@
   "library_member",
   "issue_date",
   "return_date",
+  "issue_time",
+  "return_time",
+  "price_per_day",
+  "total_days",
+  "minimum_charge",
   "books",
+  "total_charge",
   "amended_from"
  ],
  "fields": [
@@ -49,12 +55,49 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "issue_time",
+   "fieldtype": "Time",
+   "label": "Issue Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "return_time",
+   "fieldtype": "Time",
+   "label": "Return Time",
+   "reqd": 1
+  },
+  {
+   "default": "10",
+   "fieldname": "price_per_day",
+   "fieldtype": "Currency",
+   "label": "Price Per Day"
+  },
+  {
+   "fieldname": "total_days",
+   "fieldtype": "Int",
+   "label": "Total Days",
+   "read_only": 1
+  },
+  {
+   "default": "10",
+   "fieldname": "minimum_charge",
+   "fieldtype": "Currency",
+   "label": "Minimum Charge If returned on same Day ",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_charge",
+   "fieldtype": "Currency",
+   "label": "Total Charges",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-19 18:12:38.218578",
+ "modified": "2026-05-20 12:55:41.874664",
  "modified_by": "Administrator",
  "module": "Library Management",
  "name": "Book Issue",

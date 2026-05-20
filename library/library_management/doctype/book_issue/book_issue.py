@@ -1,5 +1,6 @@
 import frappe
 from frappe.model.document import Document
+from frappe.utils import date_diff
 
 
 class BookIssue(Document):
@@ -7,6 +8,7 @@ class BookIssue(Document):
     def validate(self):
 
         self.validate_dates()
+        self.calculate_charges()
         self.validate_book_issue()
 
     def validate_dates(self):
@@ -19,17 +21,39 @@ class BookIssue(Document):
                     "Return Date cannot be before Issue Date"
                 )
 
+    def calculate_charges(self):
+
+        if self.issue_date and self.return_date:
+
+            self.total_days = date_diff(
+                self.return_date,
+                self.issue_date
+            )
+
+            # SAME DAY RETURN
+            if self.total_days <= 0:
+
+                self.total_days = 0
+
+                self.total_charge = self.minimum_charge
+
+            # NORMAL CHARGE
+            else:
+
+                self.total_charge = (
+                    self.total_days * self.price_per_day
+                )
+
     def validate_book_issue(self):
 
         issued_books = []
 
         for row in self.books:
 
-            # Skip Empty Rows
             if not row.book:
                 continue
 
-            # Prevent Duplicate Books in Same Issue
+            # Prevent Duplicate Books
             if row.book in issued_books:
 
                 frappe.throw(
@@ -38,7 +62,7 @@ class BookIssue(Document):
 
             issued_books.append(row.book)
 
-            # Fetch Book Document
+            # Fetch Book
             book = frappe.get_doc(
                 "Library Book",
                 row.book
@@ -51,7 +75,7 @@ class BookIssue(Document):
                     f"Book {book.book_title} is not available"
                 )
 
-            # Check Duplicate Submitted Issue
+            # Duplicate Submitted Issue Check
             existing_issues = frappe.get_all(
                 "Book Issue",
                 filters={
