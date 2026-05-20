@@ -1,4 +1,10 @@
-# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+node_modules/
+.env
+.DS_Store
+*.log
+sites/# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
