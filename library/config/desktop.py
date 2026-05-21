@@ -7,4 +7,4 @@ def get_data():
             "type": "module",
             "label": _("Library Management")
         }
-    ]
+    ]   
