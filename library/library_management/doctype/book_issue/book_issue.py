@@ -1,65 +1,32 @@
 import frappe
+
 from frappe.model.document import Document
-from frappe import _
+
 from datetime import datetime
 
 
 class BookIssue(Document):
 
-    # =====================================================
-    # MAIN VALIDATE
-    # =====================================================
+    # =========================================
+    # VALIDATE
+    # =========================================
 
     def validate(self):
 
-        self.validate_books()
-
         self.calculate_total_charges()
 
-    # =====================================================
-    # VALIDATE BOOKS
-    # =====================================================
-
-    def validate_books(self):
-
-        unique_books = []
-
-        for row in self.books:
-
-            # Quantity always 1
-            row.quantity = 1
-
-            # Prevent duplicate books
-            if row.book in unique_books:
-
-                frappe.throw(
-                    _("Same book cannot be added multiple times")
-                )
-
-            unique_books.append(row.book)
-
-            # Fetch book
-            book = frappe.get_doc(
-                "Library Book",
-                row.book
-            )
-
-            # Check stock
-            if book.available_quantity <= 0:
-
-                frappe.throw(
-                    _(f"Book {row.book} is out of stock")
-                )
-
-    # =====================================================
+    # =========================================
     # CALCULATE TOTAL CHARGES
-    # =====================================================
+    # =========================================
 
     def calculate_total_charges(self):
 
         total = 0
 
-        # Convert dates
+        # =========================================
+        # DATE CONVERSION
+        # =========================================
+
         issue_date = datetime.strptime(
             str(self.issue_date),
             "%Y-%m-%d"
@@ -70,31 +37,51 @@ class BookIssue(Document):
             "%Y-%m-%d"
         )
 
-        # Calculate total days
-        total_days = (
+        # =========================================
+        # RENTAL DAYS
+        # =========================================
+
+        rental_days = (
             return_date - issue_date
         ).days
 
-        # Same day logic
-        if total_days <= 0:
-            total_days = 0
+        # SAME DAY CHECK
+        is_same_day = (
+            str(self.issue_date) ==
+            str(self.return_date)
+        )
 
-        self.total_days = total_days
+        # If not same day,
+        # minimum 1 rental day
+        if rental_days <= 0:
+            rental_days = 1
 
-        # Loop through all books
+        # =========================================
+        # RESET VALUES
+        # =========================================
+
+        self.late_days = 0
+        self.fine_amount = 0
+
+        # =========================================
+        # BOOK CHARGES
+        # =========================================
+
+        total_books = 0
+
         for row in self.books:
 
-            # Skip empty row
             if not row.book:
                 continue
 
-            # Fetch Library Book
+            total_books += 1
+
+            # FETCH BOOK
             book = frappe.get_doc(
                 "Library Book",
                 row.book
             )
 
-            # Get prices safely
             price_per_day = float(
                 book.price_per_day or 0
             )
@@ -103,68 +90,67 @@ class BookIssue(Document):
                 book.minimum_charge or 0
             )
 
-            # DEBUG MESSAGE
-            frappe.msgprint(
-                f"""
-                <b>Book:</b> {row.book}<br>
-                <b>Price Per Day:</b> {price_per_day}<br>
-                <b>Minimum Charge:</b> {minimum_charge}<br>
-                <b>Total Days:</b> {total_days}
-                """
-            )
-
+            # =========================================
             # SAME DAY CHARGE
-            if total_days == 0:
+            # =========================================
+
+            if is_same_day:
 
                 total += minimum_charge
 
-            # MULTIPLE DAYS CHARGE
+            # =========================================
+            # PER DAY CHARGE
+            # =========================================
+
             else:
 
                 total += (
-                    total_days *
+                    rental_days *
                     price_per_day
                 )
 
-        # Final total
+        # =========================================
+        # LATE FINE
+        # =========================================
+
+        if self.actual_return_date:
+
+            actual_return_date = datetime.strptime(
+                str(self.actual_return_date),
+                "%Y-%m-%d"
+            )
+
+            late_days = (
+                actual_return_date - return_date
+            ).days
+
+            if late_days > 0:
+
+                self.late_days = late_days
+
+                self.fine_amount = (
+
+                    late_days *
+
+                    float(self.fine_per_day or 0) *
+
+                    total_books
+
+                )
+
+                total += self.fine_amount
+
+        # =========================================
+        # TOTAL DAYS
+        # =========================================
+
+        self.total_days = (
+            rental_days +
+            self.late_days
+        )
+
+        # =========================================
+        # FINAL TOTAL
+        # =========================================
+
         self.total_charge = total
-
-    # =====================================================
-    # REDUCE STOCK ON SUBMIT
-    # =====================================================
-
-    def on_submit(self):
-
-        for row in self.books:
-
-            if not row.book:
-                continue
-
-            book = frappe.get_doc(
-                "Library Book",
-                row.book
-            )
-
-            book.available_quantity -= 1
-
-            book.save()
-
-    # =====================================================
-    # RETURN STOCK ON CANCEL
-    # =====================================================
-
-    def on_cancel(self):
-
-        for row in self.books:
-
-            if not row.book:
-                continue
-
-            book = frappe.get_doc(
-                "Library Book",
-                row.book
-            )
-
-            book.available_quantity += 1
-
-            book.save()

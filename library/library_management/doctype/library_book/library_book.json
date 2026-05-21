@@ -5,6 +5,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "book_history_link",
   "book_title",
   "author",
   "isbn",
@@ -48,10 +49,15 @@
    "fieldname": "minimum_charge",
    "fieldtype": "Currency",
    "label": "Minimum charge"
+  },
+  {
+   "fieldname": "book_history_link",
+   "fieldtype": "HTML",
+   "label": "Book History Link"
   }
  ],
  "links": [],
- "modified": "2026-05-21 11:53:06.941131",
+ "modified": "2026-05-21 15:13:01.467882",
  "modified_by": "Administrator",
  "module": "Library Management",
  "name": "Library Book",
