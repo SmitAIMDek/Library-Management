@@ -8,6 +8,8 @@
   "book_title",
   "author",
   "isbn",
+  "price_per_day",
+  "minimum_charge",
   "available_quantity"
  ],
  "fields": [
@@ -36,10 +38,20 @@
    "fieldname": "available_quantity",
    "fieldtype": "Int",
    "label": "Available Quantity"
+  },
+  {
+   "fieldname": "price_per_day",
+   "fieldtype": "Currency",
+   "label": "Price Per Day"
+  },
+  {
+   "fieldname": "minimum_charge",
+   "fieldtype": "Currency",
+   "label": "Minimum charge"
   }
  ],
  "links": [],
- "modified": "2026-05-21 10:47:46.453818",
+ "modified": "2026-05-21 11:53:06.941131",
  "modified_by": "Administrator",
  "module": "Library Management",
  "name": "Library Book",

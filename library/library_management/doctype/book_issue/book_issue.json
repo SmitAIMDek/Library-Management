@@ -11,9 +11,7 @@
   "return_date",
   "issue_time",
   "return_time",
-  "price_per_day",
   "total_days",
-  "minimum_charge",
   "books",
   "total_charge",
   "amended_from"
@@ -69,22 +67,9 @@
    "reqd": 1
   },
   {
-   "default": "10",
-   "fieldname": "price_per_day",
-   "fieldtype": "Currency",
-   "label": "Price Per Day"
-  },
-  {
    "fieldname": "total_days",
    "fieldtype": "Int",
    "label": "Total Days",
-   "read_only": 1
-  },
-  {
-   "default": "5",
-   "fieldname": "minimum_charge",
-   "fieldtype": "Currency",
-   "label": "Minimum Charge If returned on same Day ",
    "read_only": 1
   },
   {
@@ -97,7 +82,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-20 13:08:38.935679",
+ "modified": "2026-05-21 11:53:48.839421",
  "modified_by": "Administrator",
  "module": "Library Management",
  "name": "Book Issue",
